@@ -33,7 +33,7 @@ public static partial class StringExtensions
             return text;
         }
 
-        public string StringCode()
+        public string StripCode()
         {
             return text.StripCodeBlocks().StripInlineCode();
         }

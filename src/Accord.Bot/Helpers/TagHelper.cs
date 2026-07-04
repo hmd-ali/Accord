@@ -24,7 +24,7 @@ public partial class TagHelper(IMediator mediator)
             .Trim()
             .SanitiseDiscordContent();
 
-        sanitised = sanitised.StringCode();
+        sanitised = sanitised.StripCode();
         sanitised = MessageQuoteRegex().Replace(sanitised, string.Empty);
 
         if (string.IsNullOrWhiteSpace(sanitised))
