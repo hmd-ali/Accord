@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Accord.Domain;
 using Accord.Domain.Model;
 using Accord.Services.Permissions;
+using Accord.Services.RunOptions;
 using LazyCache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,14 @@ using Microsoft.Extensions.Logging;
 namespace Accord.Services.Tags;
 
 [RegisterScoped]
-public partial class TagService(AccordContext db, IAppCache appCache, UserPermissionService userPermissionService, ILogger<TagService> logger, IServiceScopeFactory scopeFactory)
+public partial class TagService(
+    AccordContext db,
+    IAppCache appCache,
+    UserPermissionService userPermissionService,
+    ILogger<TagService> logger,
+    IServiceScopeFactory scopeFactory,
+    RunOptionService runOptionService
+)
 {
     public async Task<TagDto?> GetTagByName(string name)
     {
@@ -73,13 +81,20 @@ public partial class TagService(AccordContext db, IAppCache appCache, UserPermis
 
     public async Task<string[]> GetTagsContents(string[] names)
     {
+        var maxRepliedTagsPerMessage = await runOptionService.GetOption<int>(RunOptionKey.MaxRepliedTagsPerMessage);
         var results = new Dictionary<int, TagDto>();
         foreach (var name in names)
         {
             var tagDto = await GetTagByName(name);
-            if (tagDto is not null)
+            if (tagDto is null)
             {
-                results[tagDto.Id] = tagDto;
+                continue;
+            }
+
+            results[tagDto.Id] = tagDto;
+            if (results.Count >= maxRepliedTagsPerMessage)
+            {
+                break;
             }
         }
 

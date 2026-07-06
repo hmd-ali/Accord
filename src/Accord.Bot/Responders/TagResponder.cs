@@ -26,7 +26,7 @@ public class TagResponder(TagHelper tagHelper, IDiscordRestChannelAPI channelApi
         {
             return Result.FromSuccess();
         }
-
+        
         for (var i = 0; i < tags.Length; i++)
         {
             var reply = await channelApi.CreateMessageAsync(gatewayEvent.ChannelID,
